@@ -686,18 +686,33 @@ function exportPoster() {
 
 /* ============================================================
    12. DOWNLOAD
-   Mobile browsers (iOS Safari, Android Chrome) cannot download
-   files from data: URLs — they just open the image in the tab.
-   The fix: convert to a Blob URL, which IS downloadable on mobile.
+   Cross-browser strategy:
+
+   • iOS Safari  — `<a download>` is IGNORED by iOS. We use the
+     Web Share API (navigator.share) which opens the native iOS
+     share sheet so the user can save to Photos / Files.
+
+   • Android Chrome / Samsung Browser — Blob URL + <a download>
+     works correctly.
+
+   • Desktop browsers — Blob URL + programmatic link.click().
+
+   • Fallback — open the blob URL in a new tab so the user can
+     long-press / right-click to save.
 ============================================================ */
 
 /** Tracks the last blob URL so we can revoke it on the next export. */
 let _lastBlobURL = null;
 
+/** Returns true if running on iOS (iPhone, iPad, iPod). */
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 /**
  * triggerDownload
- * Sets up the download button with a Blob URL so it works on
- * both desktop and mobile browsers.
+ * Handles downloading the poster image across all browsers.
  *
  * @param {HTMLCanvasElement} canvas - the fully-rendered export canvas
  */
@@ -709,33 +724,58 @@ function triggerDownload(canvas) {
   }
 
   const link = document.getElementById('downloadBtn');
+  const FILENAME = 'kansai-poster.png';
 
-  // canvas.toBlob is async but universally supported and gives a proper
-  // Blob that mobile browsers can save as a file.
   canvas.toBlob(function (blob) {
     if (!blob) {
-      // Fallback: use data URL if toBlob fails (very unlikely)
-      link.href = canvas.toDataURL('image/png');
-      link.download = 'kansai-poster.png';
+      // Very unlikely — open data URL in new tab as last resort
+      window.open(canvas.toDataURL('image/png'), '_blank');
       return;
     }
 
-    const blobURL = URL.createObjectURL(blob);
-    _lastBlobURL = blobURL;
-
-    link.href = blobURL;
-    link.download = 'kansai-poster.png';
-
-    // On mobile the user taps the button themselves, but for desktop
-    // we also programmatically click so the download starts right away.
-    // We use a short delay to ensure the href is set before clicking.
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) {
-      // Desktop: auto-trigger download
-      link.click();
+    // ── iOS Safari: use Web Share API ──────────────────────────
+    // iOS ignores <a download> entirely. The Web Share API opens
+    // the native share sheet (Save to Photos, Files, etc.).
+    if (isIOS() && navigator.canShare) {
+      const file = new File([blob], FILENAME, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'Kansai Poster',
+        }).catch(function (err) {
+          // User cancelled share or it failed — fall through to blob URL
+          if (err.name !== 'AbortError') {
+            _openBlobURL(blob, link, FILENAME);
+          }
+        });
+        return;  // Web Share API path handled
+      }
     }
-    // Mobile: user will tap the visible download button (blob URL works)
+
+    // ── Android / Desktop: Blob URL + <a download> ─────────────
+    _openBlobURL(blob, link, FILENAME);
+
   }, 'image/png');
+}
+
+/**
+ * _openBlobURL
+ * Sets the download link href to a Blob URL and triggers the download.
+ * Works on Android Chrome, desktop Chrome/Firefox/Edge/Safari.
+ */
+function _openBlobURL(blob, link, filename) {
+  const blobURL = URL.createObjectURL(blob);
+  _lastBlobURL = blobURL;
+
+  link.href = blobURL;
+  link.download = filename;
+
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  if (!isMobile) {
+    // Desktop: auto-trigger download immediately
+    link.click();
+  }
+  // Mobile (Android): user taps the visible download button
 }
 
 /* ============================================================
