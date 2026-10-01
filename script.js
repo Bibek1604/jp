@@ -651,7 +651,11 @@ function resetPhotoTransform() {
  * around the oval to sit ON TOP of the user photo, which looks
  * correct and intentional.
  */
-function exportPoster() {
+/**
+ * renderToExportCanvas — draws the final composite onto the hidden export canvas.
+ * Returns the canvas element (caller decides how to consume it).
+ */
+function renderToExportCanvas() {
   const exportCanvas = document.getElementById('exportCanvas');
   exportCanvas.width  = state.posterW;
   exportCanvas.height = state.posterH;
@@ -669,18 +673,69 @@ function exportPoster() {
     ec.drawImage(state.posterImg, 0, 0, state.posterW, state.posterH);
   }
 
-  return exportCanvas.toDataURL('image/png');
+  return exportCanvas;
+}
+
+/**
+ * exportPoster — legacy helper that returns a data-URL.
+ * Still used for the preview <img> on step 3.
+ */
+function exportPoster() {
+  return renderToExportCanvas().toDataURL('image/png');
 }
 
 /* ============================================================
    12. DOWNLOAD
+   Mobile browsers (iOS Safari, Android Chrome) cannot download
+   files from data: URLs — they just open the image in the tab.
+   The fix: convert to a Blob URL, which IS downloadable on mobile.
 ============================================================ */
-function triggerDownload(dataURL) {
+
+/** Tracks the last blob URL so we can revoke it on the next export. */
+let _lastBlobURL = null;
+
+/**
+ * triggerDownload
+ * Sets up the download button with a Blob URL so it works on
+ * both desktop and mobile browsers.
+ *
+ * @param {HTMLCanvasElement} canvas - the fully-rendered export canvas
+ */
+function triggerDownload(canvas) {
+  // Revoke any previous blob URL to free memory
+  if (_lastBlobURL) {
+    URL.revokeObjectURL(_lastBlobURL);
+    _lastBlobURL = null;
+  }
+
   const link = document.getElementById('downloadBtn');
-  link.href = dataURL;
-  link.download = 'my-poster.png';
-  // Optionally auto-click:
-  // link.click();
+
+  // canvas.toBlob is async but universally supported and gives a proper
+  // Blob that mobile browsers can save as a file.
+  canvas.toBlob(function (blob) {
+    if (!blob) {
+      // Fallback: use data URL if toBlob fails (very unlikely)
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'kansai-poster.png';
+      return;
+    }
+
+    const blobURL = URL.createObjectURL(blob);
+    _lastBlobURL = blobURL;
+
+    link.href = blobURL;
+    link.download = 'kansai-poster.png';
+
+    // On mobile the user taps the button themselves, but for desktop
+    // we also programmatically click so the download starts right away.
+    // We use a short delay to ensure the href is set before clicking.
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) {
+      // Desktop: auto-trigger download
+      link.click();
+    }
+    // Mobile: user will tap the visible download button (blob URL works)
+  }, 'image/png');
 }
 
 /* ============================================================
@@ -811,9 +866,11 @@ async function init() {
     // Run on next tick to let the loading UI paint
     setTimeout(() => {
       try {
-        const dataURL = exportPoster();
-        document.getElementById('finalPreviewImg').src = dataURL;
-        triggerDownload(dataURL);
+        const canvas = renderToExportCanvas();
+        // Set preview image using data URL (fast, synchronous)
+        document.getElementById('finalPreviewImg').src = canvas.toDataURL('image/png');
+        // Set up download button with Blob URL (works on mobile)
+        triggerDownload(canvas);
         hideLoading();
         goToStep(3);
       } catch (err) {
