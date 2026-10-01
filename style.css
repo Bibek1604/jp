@@ -702,3 +702,130 @@ body.drag-over .upload-area {
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .poster-preview-img { image-rendering: high-quality; }
 }
+
+/* ------------------------------------------------------------
+   16. DEVELOPER CREDIT CARD
+------------------------------------------------------------ */
+.developer-credit-card {
+  width: 100%;
+  max-width: 500px;
+  margin: 16px auto 24px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1.5px solid #dbeafe;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.developer-credit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.14);
+}
+
+.credit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.credit-badge .badge-icon {
+  font-size: 0.85rem;
+}
+
+.credit-main-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.credit-by-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.credit-dev-name {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  letter-spacing: -0.01em;
+}
+
+.credit-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
+  color: #ffffff !important;
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.credit-whatsapp-btn:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(29, 78, 216, 0.35);
+  text-decoration: none;
+  color: #ffffff !important;
+}
+
+.wa-icon-svg {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  fill: #ffffff !important;
+  flex-shrink: 0;
+  display: block;
+}
+
+.wa-btn-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.wa-number {
+  font-family: 'Outfit', 'Inter', monospace;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+}
+
+.wa-action-hint {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #bae6fd;
+}
+
