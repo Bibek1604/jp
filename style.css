@@ -1,0 +1,704 @@
+/* ============================================================
+   style.css — Kansai Cultural Evening Photo Frame
+   Design: Light cream card layout, Nepal saffron/maroon accents
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. CSS CUSTOM PROPERTIES
+------------------------------------------------------------ */
+:root {
+  /* Page background */
+  --page-bg:        #fdf3e3;
+  --page-bg2:       #f5e6cc;
+
+  /* Card */
+  --card-bg:        #ffffff;
+  --card-shadow:    0 8px 40px rgba(180,80,10,0.13), 0 2px 8px rgba(0,0,0,0.07);
+
+  /* Accents */
+  --saffron:        #e8490a;
+  --saffron-light:  #ff7c3a;
+  --saffron-pale:   #fff3ec;
+  --maroon:         #9b2020;
+  --gold:           #d4860a;
+  --gold-light:     #f5c518;
+  --nepali-green:   #1e6e40;
+
+  /* Text */
+  --text-dark:      #1a0a00;
+  --text-body:      #3d1a00;
+  --text-muted:     #996644;
+  --text-light:     #cc8855;
+
+  /* Event box */
+  --event-bg:       #f7f0e6;
+  --event-border:   #e0cdb0;
+
+  /* Step indicator */
+  --step-inactive-bg:    #ede0cc;
+  --step-inactive-text:  #996644;
+  --step-active-bg:      #e8490a;
+  --step-active-text:    #ffffff;
+  --step-done-bg:        #1e6e40;
+  --step-done-text:      #ffffff;
+
+  /* Misc */
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ------------------------------------------------------------
+   2. RESET & BASE
+------------------------------------------------------------ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--page-bg);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(232,73,10,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(30,110,64,0.07) 0%, transparent 55%);
+  min-height: 100dvh;
+  color: var(--text-dark);
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+a  { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input[type="file"] { display: none; }
+img { display: block; max-width: 100%; }
+.hidden { display: none !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--page-bg); }
+::-webkit-scrollbar-thumb { background: var(--saffron); border-radius: var(--radius-full); }
+
+/* ------------------------------------------------------------
+   3. APP SHELL — centres the card
+------------------------------------------------------------ */
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 12px 40px;
+}
+
+/* ------------------------------------------------------------
+   4. MAIN CARD
+------------------------------------------------------------ */
+.main-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------
+   5. CARD HEADER INFO SECTION
+------------------------------------------------------------ */
+.card-info {
+  padding: 24px 24px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--event-border);
+  background: linear-gradient(180deg, #fffaf5 0%, #fff 100%);
+}
+
+/* Top org badge */
+.org-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--saffron), var(--maroon));
+  color: #fff;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 16px;
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(232,73,10,0.30);
+}
+
+/* Main title */
+.event-title {
+  font-family: 'Tiro Devanagari Hindi', 'Outfit', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+}
+
+.event-title-highlight {
+  display: block;
+  background: linear-gradient(135deg, var(--saffron), var(--maroon));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.95rem;
+}
+
+/* Tagline */
+.event-tagline {
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+/* Event rows */
+.event-rows {
+  margin-top: 14px;
+  background: var(--event-bg);
+  border: 1px solid var(--event-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.event-row-item {
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+}
+
+.event-row-item + .event-row-item {
+  border-top: 1px solid var(--event-border);
+}
+
+.event-row-item .city {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--saffron);
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+
+.event-row-item .date-time {
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+.event-row-item .venue {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 3px;
+}
+
+/* ------------------------------------------------------------
+   6. STEP INDICATOR — pill style
+------------------------------------------------------------ */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 20px;
+  background: #faf6f0;
+  border-bottom: 1px solid var(--event-border);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--step-inactive-bg);
+  color: var(--step-inactive-text);
+  border-radius: var(--radius-full);
+  padding: 6px 14px 6px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.step-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.step.active {
+  background: var(--step-active-bg);
+  color: var(--step-active-text);
+  box-shadow: 0 3px 12px rgba(232,73,10,0.35);
+}
+
+.step.active .step-circle {
+  background: rgba(255,255,255,0.25);
+}
+
+.step.completed {
+  background: var(--step-done-bg);
+  color: var(--step-done-text);
+}
+
+.step.completed .step-circle {
+  background: rgba(255,255,255,0.20);
+}
+
+.step.completed .step-circle::before {
+  content: '✓';
+}
+
+/* connector line between steps */
+.step-line {
+  width: 20px;
+  height: 2px;
+  background: var(--event-border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.step-line.active {
+  background: var(--nepali-green);
+}
+
+/* ------------------------------------------------------------
+   7. STEP PANELS
+------------------------------------------------------------ */
+.step-panel {
+  animation: fadeIn 0.3s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------
+   8. STEP 1 — UPLOAD
+------------------------------------------------------------ */
+.upload-area {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Poster preview in step 1 */
+.poster-preview-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  margin-bottom: 20px;
+}
+
+.poster-preview-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Pulsing oval indicator */
+.photo-area-indicator {
+  position: absolute;
+  left: 23.75%;
+  top: 20.7%;
+  width: 55%;
+  height: 57.9%;
+  border-radius: 50%;
+  border: 2.5px dashed rgba(232,73,10,0.70);
+  background: rgba(232,73,10,0.08);
+  pointer-events: none;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(232,73,10,0.20); opacity: 0.8; }
+  50%     { box-shadow: 0 0 0 10px rgba(232,73,10,0); opacity: 1; }
+}
+
+/* Upload CTA */
+.upload-cta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 2.4rem;
+  animation: floatIcon 3s ease-in-out infinite;
+  line-height: 1;
+}
+
+@keyframes floatIcon {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+
+.upload-title {
+  font-family: 'Tiro Devanagari Hindi', 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.upload-desc {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  max-width: 320px;
+  line-height: 1.6;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+}
+
+.upload-hint {
+  font-size: 0.73rem;
+  color: var(--text-light);
+}
+
+/* Drag-over */
+body.drag-over .poster-preview-wrap {
+  box-shadow: 0 0 0 3px var(--saffron);
+}
+
+/* ------------------------------------------------------------
+   9. STEP 2 — EDITOR
+------------------------------------------------------------ */
+.editor-area {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Canvas container */
+.canvas-container {
+  position: relative;
+  background: #111;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 0;
+}
+
+.canvas-container:active { cursor: grabbing; }
+
+#previewCanvas {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+}
+
+/* Zoom strip below canvas */
+.zoom-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #faf6f0;
+  border-top: 1px solid var(--event-border);
+}
+
+.zoom-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--event-border);
+  background: #fff;
+  color: var(--text-body);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.zoom-btn:hover {
+  border-color: var(--saffron);
+  color: var(--saffron);
+  box-shadow: 0 2px 8px rgba(232,73,10,0.20);
+}
+
+.zoom-btn:active { transform: scale(0.92); }
+
+.zoom-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--event-border);
+  border-radius: var(--radius-full);
+  outline: none;
+  cursor: pointer;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--saffron);
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(232,73,10,0.40);
+  transition: transform var(--transition);
+}
+
+.zoom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+.zoom-slider::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--saffron);
+  border: none;
+  cursor: pointer;
+}
+
+/* Action buttons row */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px 18px;
+  background: #fff;
+  border-top: 1px solid var(--event-border);
+  flex-wrap: wrap;
+}
+
+.action-row .btn {
+  flex: 1;
+  min-width: 90px;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------
+   10. STEP 3 — DOWNLOAD
+------------------------------------------------------------ */
+.download-area {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.final-preview-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.final-preview-img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  display: block;
+}
+
+.final-badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  background: linear-gradient(135deg, var(--gold), var(--saffron));
+  color: #fff;
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 3px 12px rgba(212,134,10,0.45);
+  white-space: nowrap;
+}
+
+.final-title {
+  font-family: 'Tiro Devanagari Hindi', 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--saffron), var(--maroon));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.final-desc {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  max-width: 340px;
+  line-height: 1.65;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+}
+
+.download-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ------------------------------------------------------------
+   11. BUTTONS
+------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.btn:active { transform: scale(0.96); }
+
+/* Primary — saffron filled */
+.btn-primary {
+  background: linear-gradient(135deg, var(--saffron), var(--maroon));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 3px 14px rgba(232,73,10,0.35);
+}
+.btn-primary:hover {
+  box-shadow: 0 5px 20px rgba(232,73,10,0.50);
+  transform: translateY(-1px);
+}
+
+/* Secondary — outlined */
+.btn-secondary {
+  background: #fff;
+  color: var(--text-body);
+  border-color: var(--event-border);
+}
+.btn-secondary:hover {
+  border-color: var(--saffron);
+  color: var(--saffron);
+}
+
+/* Ghost */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--event-border);
+}
+.btn-ghost:hover {
+  background: var(--event-bg);
+  color: var(--text-body);
+}
+
+/* Large */
+.btn-lg {
+  padding: 13px 28px;
+  font-size: 0.95rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-icon { font-size: 1em; }
+
+/* ------------------------------------------------------------
+   12. FOOTER
+------------------------------------------------------------ */
+.app-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  max-width: 500px;
+  width: 100%;
+}
+
+/* ------------------------------------------------------------
+   13. LOADING SPINNER
+------------------------------------------------------------ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(253,243,227,0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  gap: 18px;
+  backdrop-filter: blur(4px);
+}
+
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid var(--event-border);
+  border-top-color: var(--saffron);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-family: 'Tiro Devanagari Hindi', 'Inter', sans-serif;
+}
+
+/* ------------------------------------------------------------
+   14. DRAG-OVER
+------------------------------------------------------------ */
+body.drag-over .upload-area {
+  background: rgba(232,73,10,0.04);
+}
+
+/* ------------------------------------------------------------
+   15. RESPONSIVE
+------------------------------------------------------------ */
+@media (max-width: 520px) {
+  .app-shell { padding: 12px 0 30px; }
+  .main-card { border-radius: 0; max-width: 100%; box-shadow: none; }
+  .card-info { padding: 20px 18px 16px; }
+  .event-title { font-size: 1.4rem; }
+  .event-title-highlight { font-size: 1.7rem; }
+  .step { font-size: 0.68rem; padding: 5px 10px 5px 6px; }
+  .step-circle { width: 18px; height: 18px; font-size: 0.62rem; }
+  .step-line { width: 14px; }
+  .action-row { gap: 6px; padding: 12px 14px 16px; }
+  .upload-area { padding: 20px 16px; }
+}
+
+@media (min-width: 600px) {
+  .main-card { border-radius: var(--radius-xl); }
+}
+
+/* High-DPI */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .poster-preview-img { image-rendering: high-quality; }
+}

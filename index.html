@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>सुदूरपश्चिमेली नेपाली समाज कांसाई — Photo Frame</title>
+  <meta name="description"
+    content="प्रथम सुदूरपश्चिम सांस्कृतिक साँझ २०२६ — आफ्नो फोटो थप्नुहोस् र डाउनलोड गर्नुहोस्।" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- ======================= MAIN CARD ======================= -->
+    <div class="main-card">
+
+      <!-- ── Card Info Header ── -->
+      <div class="card-info">
+        <div class="org-badge">सुदूरपश्चिमेली नेपाली समाज कांसाई</div>
+
+        <h1 class="event-title">
+          प्रथम सुदूरपश्चिम
+          <span class="event-title-highlight">सांस्कृतिक साँझ २०२६</span>
+        </h1>
+
+        <p class="event-tagline">
+          हाम्रो संस्कृति, हाम्रो पहिचान · बाढिपिडितका लागि हाम्रो अभियान
+        </p>
+
+        <div class="event-rows">
+          <div class="event-row-item">
+            <span class="city">OSAKA</span>
+            <span class="date-time">· Oct 12, 2026 (सोमबार) · 4:00 PM onwards</span>
+            <span class="venue">
+              Venue : Koko Plaza Sinosaka &nbsp;大阪府大阪市東淀川区東中島１丁目１３−13
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step Indicator ── -->
+      <div class="step-indicator" id="stepIndicator">
+        <div class="step active" id="step1Dot">
+          <div class="step-circle">1</div>
+          <span>फोटो छान्नुहोस्</span>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2Dot">
+          <div class="step-circle">2</div>
+          <span>मिलाउनुहोस्</span>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3Dot">
+          <div class="step-circle">3</div>
+          <span>डाउनलोड</span>
+        </div>
+      </div>
+
+      <!-- ===============================================================
+           STEP 1 — Upload
+      =============================================================== -->
+      <section class="step-panel" id="panelStep1">
+        <div class="upload-area">
+
+          <!-- Poster preview with oval indicator -->
+          <div class="poster-preview-wrap" id="posterPreviewWrap1">
+            <img src="image.png" alt="प्रथम सुदूरपश्चिम सांस्कृतिक साँझ २०२६ poster" class="poster-preview-img"
+              id="posterPreviewImg" />
+            <div class="photo-area-indicator" id="photoAreaIndicator" title="तपाईंको फोटो यहाँ देखिनेछ"></div>
+          </div>
+
+          <!-- Upload CTA -->
+          <div class="upload-cta">
+            <div class="upload-icon">📸</div>
+            <p class="upload-title">आफ्नो फोटो थप्नुहोस्</p>
+            <p class="upload-desc">
+              पोस्टरमा आफ्नो फोटो राख्नुहोस् र डाउनलोड गर्नुहोस्।
+            </p>
+            <label class="btn btn-primary" for="fileInput" id="uploadLabel">
+              <span class="btn-icon">📂</span> फोटो छान्नुहोस्
+            </label>
+            <input type="file" id="fileInput" accept="image/*" aria-label="आफ्नो फोटो अपलोड गर्नुहोस्" />
+            <p class="upload-hint">JPG · PNG · WEBP — जुनसुकै साइज</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===============================================================
+           STEP 2 — Editor
+      =============================================================== -->
+      <section class="step-panel hidden" id="panelStep2">
+        <div class="editor-area">
+
+          <!-- Live canvas -->
+          <div class="canvas-container" id="canvasContainer">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+
+          <!-- Zoom strip -->
+          <div class="zoom-strip">
+            <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">−</button>
+            <input type="range" id="zoomSlider" min="50" max="300" value="100" step="1" aria-label="Zoom level"
+              class="zoom-slider" />
+            <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">+</button>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="action-row">
+            <label class="btn btn-secondary" for="fileInputStep2" id="changePhotoBtn">
+              <span class="btn-icon">🔄</span> फोटो बदल्नुहोस्
+            </label>
+            <input type="file" id="fileInputStep2" accept="image/*" aria-label="फोटो बदल्नुहोस्" />
+
+            <button class="btn btn-ghost" id="resetBtn">
+              <span class="btn-icon">↩️</span> रिसेट
+            </button>
+
+            <button class="btn btn-primary" id="doneBtn">
+              <span class="btn-icon">✓</span> भयो / Done
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===============================================================
+           STEP 3 — Download
+      =============================================================== -->
+      <section class="step-panel hidden" id="panelStep3">
+        <div class="download-area">
+
+          <div class="final-preview-wrap">
+            <img id="finalPreviewImg" src="" alt="तपाईंको अन्तिम पोस्टर" class="final-preview-img" />
+            <div class="final-badge">✨ डाउनलोडका लागि तयार</div>
+          </div>
+
+          <p class="final-title">तपाईंको पोस्टर तयार छ!</p>
+          <p class="final-desc">
+            उच्च गुणस्तरको PNG फाइलको रूपमा डाउनलोड गर्नुहोस् र सामाजिक सञ्जालमा साझा गर्नुहोस्।
+          </p>
+
+          <div class="download-actions">
+            <a class="btn btn-primary btn-lg" id="downloadBtn" download="kansai-poster.png">
+              <span class="btn-icon">⬇️</span> पोस्टर डाउनलोड गर्नुहोस्
+            </a>
+            <button class="btn btn-ghost btn-lg" id="startOverBtn">
+              <span class="btn-icon">🔁</span> फेरि सुरु गर्नुहोस्
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </div><!-- /.main-card -->
+
+    <footer class="app-footer">
+      तपाईंको फोटो तपाईंकै डिभाइसमा रहन्छ। केही पनि अपलोड हुँदैन।
+    </footer>
+
+    <!-- ── Developer / Service Credit ── -->
+    <div class="credit-card">
+      <div class="credit-inner">
+        <div class="credit-label">🛠️ &amp; Developed by</div>
+        <div class="credit-name">Bibek Pandey</div>
+        <a class="credit-contact" href="https://wa.me/9779860056658" target="_blank" rel="noopener">
+          <span class="credit-wa-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              <path
+                d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.858L.057 23.486a.5.5 0 0 0 .611.61l5.78-1.514A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.893 0-3.668-.525-5.184-1.437l-.371-.22-3.833 1.004 1.022-3.736-.242-.384A9.944 9.944 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+            </svg>
+          </span>
+          <span class="credit-wa-num">+977 9860056658</span>
+          <span class="credit-wa-tag">WhatsApp / Contact</span>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /.app-shell -->
+
+  <!-- Hidden high-res export canvas -->
+  <canvas id="exportCanvas" style="display:none;"></canvas>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
