@@ -41,25 +41,28 @@
      shape  → "ellipse" | "rect" (rect uses rounded corners)
 ============================================================ */
 const CONFIG = {
-  posterSrc: 'image.png',
+  posterSrc: 'pdf.png',
 
   /**
-   * photoArea — bounding box of the empty photo slot.
-   * All values are in the ORIGINAL (natural) poster pixel space.
-   *
-   * These numbers are tuned for the generated "Special Event" poster
-   * where the oval sits centre-top.  Adjust if you use a different image.
+   * photoArea — bounding box of the photo slot.
+   * All values are in the ORIGINAL (5298 × 4804) poster pixel space.
    */
   photoArea: {
-    x:      380,   // px from left  in original poster
-    y:      300,   // px from top   in original poster
-    width:  880,   // px wide
-    height: 840,   // px tall
+    x:      1377,  // px from left in pdf.png
+    y:       990,  // px from top in pdf.png
+    width:  2786,  // px wide
+    height: 2780,  // px tall
     shape:  'ellipse',
     /** Corner radius (only used when shape === 'rect') */
     radius: 40,
   },
 };
+
+/**
+ * PHOTO_MASK_OVERLAP — extra pixels added to the photo clip ellipse radius
+ * so the photo extends slightly under the poster frame border.
+ */
+const PHOTO_MASK_OVERLAP = 10;
 
 /* ============================================================
    2. APPLICATION STATE
@@ -276,28 +279,16 @@ function renderPreview() {
 
   ctx.clearRect(0, 0, W, H);
 
-  // --- Pass 1: User photo is drawn FIRST as the bottom layer ---
-  // But we need the poster background too. Strategy:
-  // a) draw poster fully
-  // b) overwrite oval area with user photo
-  // c) composite poster overlay (oval punched out) on top
-
-  // Step A: Full poster background
-  if (state.posterImg) {
-    ctx.drawImage(state.posterImg, 0, 0, W, H);
-  }
-
-  // Step B: User photo clipped to oval (overwrites grey fill)
+  // 1. User photo is drawn in the background (clipped to the frame area)
   if (state.userImg) {
     drawClippedPhoto(ctx);
   }
 
-  // Step C: Poster overlay with oval punched out
-  // This lets the ornate golden frame ring sit ON TOP of the photo
-  // while the interior of the oval shows the user's photo through.
-  if (state.userImg && state.posterImg) {
-    const overlay = getPosterOverlayCanvas();
-    ctx.drawImage(overlay, 0, 0);
+  // 2. Poster overlay (pdf.png) is drawn ON TOP in the foreground.
+  // Since pdf.png has a transparent cutout for the photo area, the user's photo
+  // shows through clearly while singers, text, titles, and borders sit on top.
+  if (state.posterImg) {
+    ctx.drawImage(state.posterImg, 0, 0, W, H);
   }
 }
 
@@ -323,17 +314,21 @@ function getPosterOverlayCanvas() {
   const oc  = document.createElement('canvas');
   oc.width  = W;
   oc.height = H;
-  const oc_ctx = oc.getContext('2d');
+  const oc_ctx = oc.getContext('2d', { willReadFrequently: true });
 
   // Draw the full poster
   oc_ctx.drawImage(state.posterImg, 0, 0, W, H);
 
-  // Remove only the connected white background. The performers and headline
-  // overlap the circle, so cutting out the entire shape would erase them too.
+  // Remove the white placeholder inside the circle using flood-fill.
+  // This preserves singers/text that overlap the circle boundary while
+  // only clearing connected white pixels from the placeholder area.
   if (area.shape === 'ellipse') {
     const imageData = oc_ctx.getImageData(0, 0, W, H);
     const pixels = imageData.data;
-    const visited = new Uint8Array(W * H);
+    const cleared = new Uint8Array(W * H);   // tracks which pixels we cleared
+
+    // --- Pass 1: Flood-fill from centre, threshold 220 (safe for singers) ---
+    const FILL_THRESHOLD = 220;
     const stack = [
       Math.floor(area.x + area.width / 2),
       Math.floor(area.y + area.height / 2),
@@ -346,21 +341,68 @@ function getPosterOverlayCanvas() {
     while (stack.length) {
       const y = stack.pop();
       const x = stack.pop();
-      if (x < area.x || x >= area.x + area.width || y < area.y || y >= area.y + area.height) continue;
+      if (x < area.x || x >= area.x + area.width ||
+          y < area.y || y >= area.y + area.height) continue;
 
       const index = y * W + x;
-      if (visited[index]) continue;
-      visited[index] = 1;
+      if (cleared[index]) continue;
 
       const ellipseX = (x - cx) / rx;
       const ellipseY = (y - cy) / ry;
       if (ellipseX * ellipseX + ellipseY * ellipseY > 1) continue;
 
-      const pixelIndex = index * 4;
-      if (pixels[pixelIndex] < 220 || pixels[pixelIndex + 1] < 220 || pixels[pixelIndex + 2] < 220) continue;
+      const pi = index * 4;
+      if (pixels[pi] < FILL_THRESHOLD ||
+          pixels[pi + 1] < FILL_THRESHOLD ||
+          pixels[pi + 2] < FILL_THRESHOLD) continue;
 
-      pixels[pixelIndex + 3] = 0;
+      cleared[index] = 1;
+      pixels[pi + 3] = 0;   // make transparent
       stack.push(x - 1, y, x + 1, y, x, y - 1, x, y + 1);
+    }
+
+    // --- Pass 2: Edge alpha-blend — fade anti-aliased fringe pixels.
+    //     Only targets pixels where min(R,G,B) > 200 (truly near-white).
+    //     This safely ignores skin tones (min channel typically < 150)
+    //     while catching the white→poster anti-aliased blend pixels.
+    //     Run 2 iterations to erode ~2 px of halo. ---
+    for (let iter = 0; iter < 2; iter++) {
+      const newClears = [];
+      for (let y = Math.max(0, Math.floor(area.y));
+           y < Math.min(H, Math.ceil(area.y + area.height)); y++) {
+        for (let x = Math.max(0, Math.floor(area.x));
+             x < Math.min(W, Math.ceil(area.x + area.width)); x++) {
+          const idx = y * W + x;
+          if (cleared[idx]) continue;
+
+          // Must be inside the ellipse
+          const ex = (x - cx) / rx;
+          const ey = (y - cy) / ry;
+          if (ex * ex + ey * ey > 1) continue;
+
+          // Check if any 4-neighbour is already cleared
+          const hasNeighbour =
+            (x > 0          && cleared[idx - 1]) ||
+            (x < W - 1      && cleared[idx + 1]) ||
+            (y > 0          && cleared[idx - W]) ||
+            (y < H - 1      && cleared[idx + W]);
+          if (!hasNeighbour) continue;
+
+          const pi = idx * 4;
+          const r = pixels[pi], g = pixels[pi + 1], b = pixels[pi + 2];
+          const minCh = Math.min(r, g, b);
+
+          // Only affect truly near-white pixels (preserves skin/clothes)
+          if (minCh > 200) {
+            newClears.push(idx);
+          }
+        }
+      }
+      for (const idx of newClears) {
+        cleared[idx] = 1;
+        pixels[idx * 4 + 3] = 0;
+      }
+      if (newClears.length === 0) break;
     }
 
     oc_ctx.putImageData(imageData, 0, 0);
@@ -379,7 +421,7 @@ function getPosterOverlayCanvas() {
     oc_ctx.globalCompositeOperation = 'source-over';
   }
 
-  _overlayCanvas  = oc;
+  _overlayCanvas    = oc;
   _overlayPosterSrc = CONFIG.posterSrc;
   return oc;
 }
@@ -400,22 +442,24 @@ function drawClippedPhoto(targetCtx) {
   targetCtx.save();
 
   // --- Build the clip path ---
+  // The clip ellipse is expanded by PHOTO_MASK_OVERLAP px so the photo
+  // extends slightly underneath the poster's boundary ring.  This hides
+  // any anti-aliased white/light edge pixels (the "white halo" fix).
   targetCtx.beginPath();
 
   if (area.shape === 'ellipse') {
-    // Canvas ellipse: centre, radii x/y, rotation, startAngle, endAngle
-    targetCtx.ellipse(
-      area.x + area.width  / 2,   // cx
-      area.y + area.height / 2,   // cy
-      area.width  / 2,            // rx
-      area.height / 2,            // ry
-      0,                          // rotation
-      0, Math.PI * 2              // full circle
-    );
+    const cx = area.x + area.width  / 2;
+    const cy = area.y + area.height / 2;
+    const rx = area.width  / 2 + PHOTO_MASK_OVERLAP;
+    const ry = area.height / 2 + PHOTO_MASK_OVERLAP;
+    targetCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
   } else {
-    // Rounded rectangle
-    const r = area.radius || 0;
-    const x = area.x, y = area.y, w = area.width, h = area.height;
+    // Rounded rectangle — expand by overlap on all sides
+    const ol = PHOTO_MASK_OVERLAP;
+    const r  = area.radius || 0;
+    const x  = area.x - ol, y = area.y - ol;
+    const w  = area.width  + ol * 2;
+    const h  = area.height + ol * 2;
     targetCtx.moveTo(x + r, y);
     targetCtx.arcTo(x + w, y,     x + w, y + h, r);
     targetCtx.arcTo(x + w, y + h, x,     y + h, r);
@@ -615,18 +659,15 @@ function exportPoster() {
   const ec = exportCanvas.getContext('2d');
   ec.clearRect(0, 0, state.posterW, state.posterH);
 
-  // 1. Draw full poster as background (fills entire canvas including behind oval)
-  ec.drawImage(state.posterImg, 0, 0, state.posterW, state.posterH);
-
-  // 2. Draw user photo clipped to the oval mask on top of the background
+  // 1. Draw user photo clipped to the oval mask in the background
   if (state.userImg) {
     drawClippedPhoto(ec);
   }
 
-  // 3. Draw the poster overlay (oval punched out) so the ornate frame ring
-  //    sits on top of the photo while the oval interior shows the photo clearly.
-  const overlay = getPosterOverlayCanvas();
-  ec.drawImage(overlay, 0, 0);
+  // 2. Draw poster overlay (pdf.png) on top in the foreground
+  if (state.posterImg) {
+    ec.drawImage(state.posterImg, 0, 0, state.posterW, state.posterH);
+  }
 
   return exportCanvas.toDataURL('image/png');
 }
